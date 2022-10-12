@@ -1,0 +1,14 @@
+spring:
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: user_db
+
+# Mongo -Atlas Configuration
+#spring:
+#  data:
+#    mongodb:
+#      uri: mongodb+srv://admin:admin@pspatel.dkytwcf.mongodb.net/?retryWrites=true&w=majority
+#      database: Task
+
