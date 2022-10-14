@@ -2,7 +2,8 @@ package com.pspatel.CRUDService.controller;
 
 import com.pspatel.CRUDService.model.User;
 import com.pspatel.CRUDService.service.UserService;
-import com.pspatel.CRUDService.service.UserServiceImpl;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,27 +24,35 @@ public class UserController {
   @Autowired private UserService userService;
 
   @PostMapping
+  @ApiOperation(value = "Add new User", response = User.class)
   @ResponseStatus(HttpStatus.CREATED)
   public User createUser(@RequestBody User user) {
     return userService.addUser(user);
   }
 
   @GetMapping
+  @ApiOperation(value = "Fetch all the users")
   public List<User> getAllUsers() {
     return userService.getUsers();
   }
 
   @GetMapping("/{userId}")
-  public User getUserById(@PathVariable String userId) {
+  @ApiOperation(value = "Find user by Id")
+  public User getUserById(
+      @ApiParam(value = "ID value for the user you need to retriever", required = true)
+          @PathVariable
+          String userId) {
     return userService.getUserById(userId);
   }
 
   @PutMapping
+  @ApiOperation(value = "Update user details")
   public User updateUser(@RequestBody User user) {
     return userService.updateUserById(user);
   }
 
   @DeleteMapping("/{userId}")
+  @ApiOperation(value = "Delete user by Id")
   public String deleteUser(@PathVariable String userId) {
     return userService.deleteUserById(userId);
   }
