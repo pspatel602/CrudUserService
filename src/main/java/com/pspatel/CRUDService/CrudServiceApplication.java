@@ -1,11 +1,10 @@
 package com.pspatel.CRUDService;
 
-import com.pspatel.CRUDService.config.RsaKeyProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
-@EnableConfigurationProperties(RsaKeyProperties.class)
+@EnableWebMvc
 @SpringBootApplication
 public class CrudServiceApplication {
 
