@@ -43,12 +43,22 @@ public class OrganizationController {
 
   @GetMapping("/{organizationId}")
   @PreAuthorize("hasRole('ADMIN')")
-  @ApiOperation(value = "Find user by Id")
+  @ApiOperation(value = "Find Organization by Id")
   public Organization getOrgById(
       @ApiParam(value = "ID value for the organization you need to retriever", required = true)
           @PathVariable
           String organizationId) {
     return orgService.getOrganizationById(organizationId);
+  }
+
+  @GetMapping("/{organizationName}")
+  @PreAuthorize("hasRole('ADMIN')")
+  @ApiOperation(value = "Find Organization by Name")
+  public Organization getOrgByName(
+      @ApiParam(value = "Name value for the organization you need to retriever", required = true)
+      @PathVariable
+      String organizationName) {
+    return orgService.getOrganizationById(organizationName);
   }
 
   @PutMapping

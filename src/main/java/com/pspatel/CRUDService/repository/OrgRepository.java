@@ -6,4 +6,8 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 public interface OrgRepository extends MongoRepository<Organization, String> {
 
+  Organization findByOrgName(String orgName);
+
+  Boolean existsByOrgName(String orgName);
+
 }

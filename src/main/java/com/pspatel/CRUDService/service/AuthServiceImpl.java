@@ -9,6 +9,7 @@ import com.pspatel.CRUDService.payload.request.LoginRequest;
 import com.pspatel.CRUDService.payload.request.SignupRequest;
 import com.pspatel.CRUDService.payload.response.JwtResponse;
 import com.pspatel.CRUDService.payload.response.MessageResponse;
+import com.pspatel.CRUDService.repository.OrgRepository;
 import com.pspatel.CRUDService.repository.RoleRepository;
 import com.pspatel.CRUDService.repository.UserRepository;
 import com.pspatel.CRUDService.email.EmailValidator;
@@ -40,6 +41,8 @@ public class AuthServiceImpl implements AuthService {
   @Autowired PasswordEncoder encoder;
   @Autowired JwtUtils jwtUtils;
   @Autowired private EmailSenderService emailSenderService;
+
+  @Autowired private OrgRepository orgRepository;
 
   @Override
   public ResponseEntity<?> authenticateUser(LoginRequest loginRequest) {
@@ -81,6 +84,9 @@ public class AuthServiceImpl implements AuthService {
                       + "Enter different email!"));
     }
 
+    if (!orgRepository.existsByOrgName(signUpRequest.getOrganization().getOrgName())) {
+      orgRepository.save(signUpRequest.getOrganization());
+    }
     // Create new user's account
     String verificationCode = RandomString.make(64);
     User user =
@@ -89,7 +95,8 @@ public class AuthServiceImpl implements AuthService {
             signUpRequest.getEmail(),
             encoder.encode(signUpRequest.getPassword()),
             verificationCode,
-            false);
+            false,
+            signUpRequest.getOrganization());
 
     Set<String> strRoles = signUpRequest.getRoles();
     Set<Role> roles = new HashSet<>();

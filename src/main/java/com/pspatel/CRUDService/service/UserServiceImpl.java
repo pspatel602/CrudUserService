@@ -2,9 +2,11 @@ package com.pspatel.CRUDService.service;
 
 import com.pspatel.CRUDService.exception.UserServiceCustomException;
 import com.pspatel.CRUDService.model.ERole;
+import com.pspatel.CRUDService.model.Organization;
 import com.pspatel.CRUDService.model.Role;
 import com.pspatel.CRUDService.model.User;
 import com.pspatel.CRUDService.payload.request.UserRequest;
+import com.pspatel.CRUDService.repository.OrgRepository;
 import com.pspatel.CRUDService.repository.RoleRepository;
 import com.pspatel.CRUDService.repository.UserRepository;
 import java.util.HashSet;
@@ -21,16 +23,25 @@ public class UserServiceImpl implements UserService {
   @Autowired private UserRepository repository;
   @Autowired private RoleRepository roleRepository;
 
+  @Autowired private OrgRepository orgRepository;
+
   @Override
   public User addUser(UserRequest userRequest) {
     String verificationCode = RandomString.make(64);
+    if(!orgRepository.existsByOrgName(userRequest.getOrganization().getOrgName())){
+      orgRepository.save(userRequest.getOrganization());
+    } else{
+      System.out.println("Organization Already exist");
+    }
+
     User user =
         new User(
             userRequest.getUsername(),
             userRequest.getEmail(),
             encoder.encode(userRequest.getPassword()),
             verificationCode,
-            false);
+            false,
+            userRequest.getOrganization());
 
     Set<String> strRoles = userRequest.getRoles();
     Set<Role> roles = new HashSet<>();

@@ -1,5 +1,6 @@
 package com.pspatel.CRUDService.payload.request;
 
+import com.pspatel.CRUDService.model.Organization;
 import java.util.Set;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -29,4 +30,6 @@ public class UserRequest {
   @NotBlank
   @Size(min = 6, max = 40)
   private String password;
+
+  private Organization organization;
 }
