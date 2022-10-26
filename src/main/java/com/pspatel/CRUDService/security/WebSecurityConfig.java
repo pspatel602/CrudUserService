@@ -67,7 +67,6 @@ public class WebSecurityConfig {
         .authorizeRequests(
             auth -> {
               auth.antMatchers("/api/auth/**").permitAll();
-              auth.antMatchers("/api/auth/**").permitAll();
               auth.anyRequest().authenticated();
             });
 

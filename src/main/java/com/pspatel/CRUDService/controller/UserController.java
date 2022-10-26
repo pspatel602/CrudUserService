@@ -7,6 +7,9 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -36,6 +39,7 @@ public class UserController {
 
   @GetMapping
   @ApiOperation(value = "Fetch all the users")
+  @Cacheable(value = "users")
   public List<User> getAllUsers() {
     return userService.getUsers();
   }
@@ -43,6 +47,7 @@ public class UserController {
   @GetMapping("/{userId}")
   @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
   @ApiOperation(value = "Find user by Id")
+  @Cacheable(value = "users", key = "#userId")
   public User getUserById(
       @ApiParam(value = "ID value for the user you need to retriever", required = true)
           @PathVariable
@@ -50,9 +55,10 @@ public class UserController {
     return userService.getUserByUsername(userId);
   }
 
-  @PutMapping
+  @PutMapping("/{userId}")
   @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
   @ApiOperation(value = "Update user details")
+  @CachePut(cacheNames = "users", key = "#user.id")
   public User updateUser(@RequestBody User user) {
     return userService.updateUserByUsername(user);
   }
@@ -60,6 +66,7 @@ public class UserController {
   @DeleteMapping("/{userId}")
   @PreAuthorize("hasRole('ADMIN')")
   @ApiOperation(value = "Delete user by Id")
+  @CacheEvict(cacheNames = "users", key = "#userId")
   public String deleteUser(@PathVariable String userId) {
     return userService.deleteUserById(userId);
   }

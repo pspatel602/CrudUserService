@@ -87,6 +87,7 @@ public class AuthServiceImpl implements AuthService {
     if (!orgRepository.existsByOrgName(signUpRequest.getOrganization().getOrgName())) {
       orgRepository.save(signUpRequest.getOrganization());
     }
+
     // Create new user's account
     String verificationCode = RandomString.make(64);
     User user =
@@ -134,7 +135,6 @@ public class AuthServiceImpl implements AuthService {
 
     user.setRoles(roles);
     userRepository.save(user);
-
     return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
   }
 

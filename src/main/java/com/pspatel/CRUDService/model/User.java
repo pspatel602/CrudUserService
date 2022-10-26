@@ -1,5 +1,7 @@
 package com.pspatel.CRUDService.model;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 import javax.validation.constraints.Email;
@@ -18,7 +20,10 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class User {
+public class User implements Serializable {
+
+  @Serial
+  private static final long serialVersionUID = 2605093102857375803L;
   @Id private String id;
 
   @NotBlank
@@ -38,9 +43,7 @@ public class User {
   private String verificationCode;
 
   private boolean isEnabled;
-
   @DBRef private Set<Role> roles = new HashSet<>();
-
   private Organization organization;
 
   public User(

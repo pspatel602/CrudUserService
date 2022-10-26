@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 
 @Data
 @AllArgsConstructor
@@ -31,5 +32,24 @@ public class UserRequest {
   @Size(min = 6, max = 40)
   private String password;
 
+  @Size(max = 64)
+  private String verificationCode;
+
+  private boolean isEnabled;
   private Organization organization;
+
+  public UserRequest(
+      String username,
+      String email,
+      String password,
+      String verificationCode,
+      boolean isEnabled,
+      Organization org) {
+    this.username = username;
+    this.email = email;
+    this.password = password;
+    this.verificationCode = verificationCode;
+    this.isEnabled = isEnabled;
+    this.organization = org;
+  }
 }

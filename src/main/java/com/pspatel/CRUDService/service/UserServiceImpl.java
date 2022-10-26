@@ -1,8 +1,8 @@
 package com.pspatel.CRUDService.service;
 
+import com.pspatel.CRUDService.email.EmailSenderService;
 import com.pspatel.CRUDService.exception.UserServiceCustomException;
 import com.pspatel.CRUDService.model.ERole;
-import com.pspatel.CRUDService.model.Organization;
 import com.pspatel.CRUDService.model.Role;
 import com.pspatel.CRUDService.model.User;
 import com.pspatel.CRUDService.payload.request.UserRequest;
@@ -13,24 +13,27 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import net.bytebuddy.utility.RandomString;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service("userServiceImpl")
 public class UserServiceImpl implements UserService {
+  private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
   @Autowired PasswordEncoder encoder;
   @Autowired private UserRepository repository;
   @Autowired private RoleRepository roleRepository;
-
   @Autowired private OrgRepository orgRepository;
+  @Autowired private EmailSenderService emailSenderService;
 
   @Override
   public User addUser(UserRequest userRequest) {
     String verificationCode = RandomString.make(64);
-    if(!orgRepository.existsByOrgName(userRequest.getOrganization().getOrgName())){
+    if (!orgRepository.existsByOrgName(userRequest.getOrganization().getOrgName())) {
       orgRepository.save(userRequest.getOrganization());
-    } else{
+    } else {
       System.out.println("Organization Already exist");
     }
 
@@ -77,16 +80,19 @@ public class UserServiceImpl implements UserService {
 
     user.setRoles(roles);
     repository.save(user);
+    emailSenderService.sendVerificationEmail(user, user.getEmail(), user.getVerificationCode());
     return user;
   }
 
   @Override
   public List<User> getUsers() {
+    logger.info("get All users from db...");
     return repository.findAll();
   }
 
   @Override
   public User getUserByUsername(String username) {
+    logger.info("get " + username + " from the db...");
     return repository
         .findByUsername(username)
         .orElseThrow(

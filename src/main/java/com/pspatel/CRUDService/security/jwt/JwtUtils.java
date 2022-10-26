@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class JwtUtils {
   private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
-  private final int jwtExpirationMs = 150000;
+  private final int jwtExpirationMs = 600000;
   private String jwtSecret = "patelSecretKey";
 
   public String generateJwtToken(Authentication authentication) {

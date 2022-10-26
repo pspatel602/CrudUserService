@@ -1,5 +1,7 @@
 package com.pspatel.CRUDService.model;
 
+import java.io.Serial;
+import java.io.Serializable;
 import javax.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,7 +15,9 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Organization {
+public class Organization implements Serializable {
+
+  @Serial private static final long serialVersionUID = 4361766830303263077L;
   @Id private String id;
   @NotBlank private String orgName;
   @NotBlank private String location;
