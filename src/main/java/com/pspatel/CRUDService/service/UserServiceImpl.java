@@ -93,13 +93,20 @@ public class UserServiceImpl implements UserService {
   @Override
   public User getUserByUsername(String username) {
     logger.info("get " + username + " from the db...");
-    return repository
-        .findByUsername(username)
-        .orElseThrow(
-            () ->
-                new UserServiceCustomException(
-                    "User with given username (" + username + ") not " + "found",
-                    "USER_NOT_FOUND"));
+    User foundUser =
+        repository
+            .findByUsername(username)
+            .orElseThrow(
+                () ->
+                    new UserServiceCustomException(
+                        "User with given username (" + username + ") not " + "found",
+                        "USER_NOT_FOUND"));
+
+    if (foundUser.isEnabled()) {
+      return foundUser;
+    }
+    throw new UserServiceCustomException(
+        "User with given username (" + username + ") is not enabled", "USER_IS_NOT_ENABLED");
   }
 
   @Override
