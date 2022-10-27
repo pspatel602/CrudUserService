@@ -6,7 +6,7 @@ import com.pspatel.CRUDService.service.OrgService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -23,9 +23,10 @@ import org.springframework.web.bind.annotation.RestController;
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/admin/orgs")
+@RequiredArgsConstructor
 public class OrganizationController {
 
-  @Autowired private OrgService orgService;
+  private final OrgService orgService;
 
   @PostMapping
   @PreAuthorize("hasRole('ADMIN')")
@@ -41,7 +42,7 @@ public class OrganizationController {
     return orgService.getOrganizations();
   }
 
-  @GetMapping("/{organizationId}")
+  @GetMapping("/id/{organizationId}")
   @PreAuthorize("hasRole('ADMIN')")
   @ApiOperation(value = "Find Organization by Id")
   public Organization getOrgById(
@@ -56,9 +57,9 @@ public class OrganizationController {
   @ApiOperation(value = "Find Organization by Name")
   public Organization getOrgByName(
       @ApiParam(value = "Name value for the organization you need to retriever", required = true)
-      @PathVariable
-      String organizationName) {
-    return orgService.getOrganizationById(organizationName);
+          @PathVariable
+          String organizationName) {
+    return orgService.getOrganizationByName(organizationName);
   }
 
   @PutMapping

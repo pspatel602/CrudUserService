@@ -19,9 +19,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import net.bytebuddy.utility.RandomString;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -31,18 +30,17 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
   private final EmailValidator emailValidator;
-  @Autowired AuthenticationManager authenticationManager;
-  @Autowired UserRepository userRepository;
-  @Autowired RoleRepository roleRepository;
-  @Autowired PasswordEncoder encoder;
-  @Autowired JwtUtils jwtUtils;
-  @Autowired private EmailSenderService emailSenderService;
-
-  @Autowired private OrgRepository orgRepository;
+  private final EmailSenderService emailSenderService;
+  private final AuthenticationManager authenticationManager;
+  private final JwtUtils jwtUtils;
+  private final PasswordEncoder encoder;
+  private final UserRepository userRepository;
+  private final RoleRepository roleRepository;
+  private final OrgRepository orgRepository;
 
   @Override
   public ResponseEntity<?> authenticateUser(LoginRequest loginRequest) {

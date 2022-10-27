@@ -1,6 +1,6 @@
 package com.pspatel.CRUDService.exception;
 
-import com.pspatel.CRUDService.model.ErrorResponse;
+import com.pspatel.CRUDService.payload.response.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;

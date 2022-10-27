@@ -13,6 +13,8 @@ public interface OrgService {
   // Read Operation
   public Organization getOrganizationById(String organizationId);
 
+  public Organization getOrganizationByName(String organizationName);
+
   // Update Operation
   public Organization updateOrganizationByUsername(Organization organizationRequest);
 

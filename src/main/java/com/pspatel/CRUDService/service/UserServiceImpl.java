@@ -12,21 +12,22 @@ import com.pspatel.CRUDService.repository.UserRepository;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import lombok.RequiredArgsConstructor;
 import net.bytebuddy.utility.RandomString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service("userServiceImpl")
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
   private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
-  @Autowired PasswordEncoder encoder;
-  @Autowired private UserRepository repository;
-  @Autowired private RoleRepository roleRepository;
-  @Autowired private OrgRepository orgRepository;
-  @Autowired private EmailSenderService emailSenderService;
+  private final PasswordEncoder encoder;
+  private final UserRepository repository;
+  private final RoleRepository roleRepository;
+  private final OrgRepository orgRepository;
+  private final EmailSenderService emailSenderService;
 
   @Override
   public User addUser(UserRequest userRequest) {
@@ -133,6 +134,7 @@ public class UserServiceImpl implements UserService {
             .email(userRequest.getEmail())
             .password(userRequest.getPassword())
             .roles(userRequest.getRoles())
+            .organization(userRequest.getOrganization())
             .build();
 
     return repository.save(existingUser);

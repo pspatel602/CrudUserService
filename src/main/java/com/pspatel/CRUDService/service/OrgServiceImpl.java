@@ -5,13 +5,14 @@ import com.pspatel.CRUDService.model.Organization;
 import com.pspatel.CRUDService.repository.OrgRepository;
 import java.util.List;
 import java.util.UUID;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class OrgServiceImpl implements OrgService {
 
-  @Autowired private OrgRepository orgRepository;
+  private final OrgRepository orgRepository;
 
   @Override
   public Organization addOrganization(Organization organizationRequest) {
@@ -37,6 +38,11 @@ public class OrgServiceImpl implements OrgService {
     return orgRepository
         .findById(organizationId)
         .orElseThrow(() -> new RuntimeException("Error: Organization is not found."));
+  }
+
+  @Override
+  public Organization getOrganizationByName(String organizationName) {
+    return orgRepository.findByOrgName(organizationName);
   }
 
   @Override

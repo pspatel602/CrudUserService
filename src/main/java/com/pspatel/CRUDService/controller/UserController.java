@@ -6,7 +6,7 @@ import com.pspatel.CRUDService.service.UserService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -26,9 +26,10 @@ import org.springframework.web.bind.annotation.RestController;
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/users")
+@RequiredArgsConstructor
 public class UserController {
 
-  @Autowired private UserService userService;
+  private final UserService userService;
 
   @PostMapping
   @ApiOperation(value = "Add new User", response = User.class)
@@ -55,7 +56,7 @@ public class UserController {
     return userService.getUserByUsername(userId);
   }
 
-  @PutMapping("/{userId}")
+  @PutMapping
   @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
   @ApiOperation(value = "Update user details")
   @CachePut(cacheNames = "users", key = "#user.id")

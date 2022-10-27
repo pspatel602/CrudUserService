@@ -4,7 +4,7 @@ import com.pspatel.CRUDService.payload.request.LoginRequest;
 import com.pspatel.CRUDService.payload.request.SignupRequest;
 import com.pspatel.CRUDService.service.AuthService;
 import javax.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -18,10 +18,11 @@ import org.springframework.web.bind.annotation.RestController;
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/auth")
+@RequiredArgsConstructor
 public class AuthController {
 
-  @Autowired AuthenticationManager authenticationManager;
-  @Autowired AuthService authService;
+  private final AuthenticationManager authenticationManager;
+  private final AuthService authService;
 
   @PostMapping("/signin")
   public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {

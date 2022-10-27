@@ -1,6 +1,7 @@
 package com.pspatel.CRUDService.security;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import com.pspatel.CRUDService.security.jwt.JwtUtils;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,15 +20,17 @@ import com.pspatel.CRUDService.security.jwt.AuthTokenFilter;
 import com.pspatel.CRUDService.security.services.UserDetailsServiceImpl;
 
 @Configuration
+@RequiredArgsConstructor
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig {
-  @Autowired UserDetailsServiceImpl userDetailsService;
+  private final UserDetailsServiceImpl userDetailsService;
+  private final AuthEntryPointJwt unauthorizedHandler;
 
-  @Autowired private AuthEntryPointJwt unauthorizedHandler;
+  private final JwtUtils jwtUtils;
 
   @Bean
   public AuthTokenFilter authenticationJwtTokenFilter() {
-    return new AuthTokenFilter();
+    return new AuthTokenFilter(jwtUtils, userDetailsService);
   }
 
   @Bean

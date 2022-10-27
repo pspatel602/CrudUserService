@@ -1,6 +1,6 @@
 package com.pspatel.CRUDService.security.services;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -11,8 +11,9 @@ import com.pspatel.CRUDService.model.User;
 import com.pspatel.CRUDService.repository.UserRepository;
 
 @Service
+@RequiredArgsConstructor
 public class UserDetailsServiceImpl implements UserDetailsService {
-  @Autowired UserRepository userRepository;
+  private final UserRepository userRepository;
 
   @Override
   @Transactional

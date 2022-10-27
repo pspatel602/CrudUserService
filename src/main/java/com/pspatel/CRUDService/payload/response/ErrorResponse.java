@@ -1,4 +1,4 @@
-package com.pspatel.CRUDService.model;
+package com.pspatel.CRUDService.payload.response;
 
 import java.io.Serial;
 import java.io.Serializable;
