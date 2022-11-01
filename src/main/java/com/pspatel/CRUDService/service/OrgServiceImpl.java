@@ -46,7 +46,7 @@ public class OrgServiceImpl implements OrgService {
   }
 
   @Override
-  public Organization updateOrganizationByUsername(Organization organizationRequest) {
+  public Organization updateOrganization(Organization organizationRequest) {
     // get existing org from db
     Organization existingOrg =
         orgRepository

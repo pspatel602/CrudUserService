@@ -59,7 +59,7 @@ public class UserController {
   @PutMapping
   @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
   @ApiOperation(value = "Update user details")
-  @CachePut(cacheNames = "users", key = "#user.id")
+  @CachePut(cacheNames = "users", key = "#p0")
   public User updateUser(@RequestBody User user) {
     return userService.updateUserByUsername(user);
   }

@@ -16,7 +16,7 @@ public interface OrgService {
   public Organization getOrganizationByName(String organizationName);
 
   // Update Operation
-  public Organization updateOrganizationByUsername(Organization organizationRequest);
+  public Organization updateOrganization(Organization organizationRequest);
 
   // Delete Operation
   public String deleteOrganizationById(String organizationId);

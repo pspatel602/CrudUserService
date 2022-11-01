@@ -13,16 +13,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.bytebuddy.utility.RandomString;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service("userServiceImpl")
+@Slf4j
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-  private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
   private final PasswordEncoder encoder;
   private final UserRepository repository;
   private final RoleRepository roleRepository;
@@ -34,9 +33,7 @@ public class UserServiceImpl implements UserService {
     String verificationCode = RandomString.make(64);
     if (!orgRepository.existsByOrgName(userRequest.getOrganization().getOrgName())) {
       orgRepository.save(userRequest.getOrganization());
-    } else {
-      System.out.println("Organization Already exist");
-    }
+    } else { System.out.println("Organization Already exist");}
 
     User user =
         new User(
@@ -51,10 +48,7 @@ public class UserServiceImpl implements UserService {
     Set<Role> roles = new HashSet<>();
 
     if (strRoles == null) {
-      Role userRole =
-          roleRepository
-              .findByName(ERole.ROLE_USER)
-              .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+      Role userRole = roleRepository.findByName(ERole.ROLE_USER).orElseThrow(() -> new RuntimeException("Error: Role is not found."));
       roles.add(userRole);
     } else {
       strRoles.forEach(
@@ -87,13 +81,13 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public List<User> getUsers() {
-    logger.info("get All users from db...");
+    log.info("get All users from db...");
     return repository.findAll();
   }
 
   @Override
   public User getUserByUsername(String username) {
-    logger.info("get " + username + " from the db...");
+    log.info("get " + username + " from the db...");
     User foundUser =
         repository
             .findByUsername(username)
@@ -106,8 +100,7 @@ public class UserServiceImpl implements UserService {
     if (foundUser.isEnabled()) {
       return foundUser;
     }
-    throw new UserServiceCustomException(
-        "User with given username (" + username + ") is not enabled", "USER_IS_NOT_ENABLED");
+    throw new UserServiceCustomException("User with given username (" + username + ") is not enabled", "USER_IS_NOT_ENABLED");
   }
 
   @Override
@@ -142,7 +135,6 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public String deleteUserById(String username) {
-
     repository.deleteByUsername(username);
     return "User " + username + " deleted successfully.";
   }

@@ -12,12 +12,10 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 @Document(collection = "roles")
 public class Role implements Serializable {
 
-  @Serial
-  private static final long serialVersionUID = -7014377621911648671L;
+  @Serial private static final long serialVersionUID = -7014377621911648671L;
   @Id private String id;
 
   private ERole name;

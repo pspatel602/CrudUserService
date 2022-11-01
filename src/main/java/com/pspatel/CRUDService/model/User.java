@@ -22,8 +22,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @NoArgsConstructor
 public class User implements Serializable {
 
-  @Serial
-  private static final long serialVersionUID = 2605093102857375803L;
+  @Serial private static final long serialVersionUID = 2605093102857375803L;
   @Id private String id;
 
   @NotBlank

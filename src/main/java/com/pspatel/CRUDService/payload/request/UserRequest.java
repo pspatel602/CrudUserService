@@ -1,6 +1,8 @@
 package com.pspatel.CRUDService.payload.request;
 
 import com.pspatel.CRUDService.model.Organization;
+import com.pspatel.CRUDService.model.Role;
+import java.util.HashSet;
 import java.util.Set;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -24,7 +26,7 @@ public class UserRequest {
   @Email
   private String email;
 
-  private Set<String> roles;
+  private Set<String> roles = new HashSet<>();;
 
   @NotBlank
   @Size(min = 6, max = 40)

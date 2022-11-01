@@ -2,11 +2,13 @@ package com.pspatel.CRUDService.controller;
 
 import com.pspatel.CRUDService.model.Organization;
 import com.pspatel.CRUDService.model.User;
-import com.pspatel.CRUDService.service.OrgService;
+import com.pspatel.CRUDService.service.OrgServiceImpl;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -21,12 +23,12 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
-@RestController
 @RequestMapping("/api/admin/orgs")
-@RequiredArgsConstructor
+@AllArgsConstructor
+@NoArgsConstructor
+@RestController
 public class OrganizationController {
-
-  private final OrgService orgService;
+  @Autowired private OrgServiceImpl orgService;
 
   @PostMapping
   @PreAuthorize("hasRole('ADMIN')")
@@ -38,7 +40,7 @@ public class OrganizationController {
 
   @GetMapping
   @ApiOperation(value = "Fetch all the Organization")
-  public List<Organization> getAllUsers() {
+  public List<Organization> getAllOrgs() {
     return orgService.getOrganizations();
   }
 
@@ -65,8 +67,8 @@ public class OrganizationController {
   @PutMapping
   @PreAuthorize("hasRole('ADMIN')")
   @ApiOperation(value = "Update Organization details")
-  public Organization updateUser(@RequestBody Organization organization) {
-    return orgService.updateOrganizationByUsername(organization);
+  public Organization updateOrganization(@RequestBody Organization organization) {
+    return orgService.updateOrganization(organization);
   }
 
   @DeleteMapping("/{orgId}")

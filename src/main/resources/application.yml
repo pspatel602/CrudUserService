@@ -1,11 +1,24 @@
-#Mongo-Atlas Configuration
 spring:
+  #Embedded Mongodb Configuration
   data:
     mongodb:
-      uri: mongodb+srv://admin:admin@pspatel.dkytwcf.mongodb.net/?retryWrites=true&w=majority
-      database: user_db
+      embedded:
+        version=4:0:2
+      database: test
       host: localhost
       port: 27017
+
+
+  #      #Mongo-Atlas Configuration
+  # Database Link: mongodb+srv://admin:admin@pspatel.dkytwcf.mongodb.net/?retryWrites=true&w=majority
+  #      mongodb:
+  #        embedded:
+  #          version=4:0:2
+  #        uri: mongodb+srv://admin:admin@pspatel.dkytwcf.mongodb.net/?retryWrites=true&w=majority
+  #        database: user_db
+  #        host: localhost
+  #        port: 27017
+
   mail:
     host: smtp.gmail.com
     port: 587
@@ -18,11 +31,4 @@ spring:
           auth: true
           starttls:
             enable: true
-
-#spring:
-#  data:
-#    mongodb:
-#      host: localhost
-#      port: 27017
-#      database: user_db
 
