@@ -7,7 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -18,4 +18,11 @@ public class ErrorResponse implements Serializable {
   private String errorMessage;
   private String errorCode;
 
+  public String getErrorMessage() {
+    return errorMessage;
+  }
+
+  public String getErrorCode() {
+    return errorCode;
+  }
 }

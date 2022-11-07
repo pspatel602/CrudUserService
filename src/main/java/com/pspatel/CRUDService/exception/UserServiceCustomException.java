@@ -3,7 +3,7 @@ package com.pspatel.CRUDService.exception;
 import java.io.Serial;
 import lombok.Data;
 
-@Data
+
 public class UserServiceCustomException extends RuntimeException{
 
   @Serial
@@ -13,5 +13,9 @@ public class UserServiceCustomException extends RuntimeException{
   public UserServiceCustomException(String errorMessage , String errorCode) {
     super(errorMessage);
     this.errorCode = errorCode;
+  }
+
+  public String getErrorCode() {
+    return errorCode;
   }
 }

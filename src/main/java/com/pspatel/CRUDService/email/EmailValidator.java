@@ -17,7 +17,7 @@ public class EmailValidator implements Predicate<String> {
   public boolean test(String email) {
     Matcher matcher = pattern.matcher(email);
     System.out.println(email + " : " + matcher.matches());
-
-    return matcher.matches();
+    boolean result = matcher.matches();
+    return result;
   }
 }

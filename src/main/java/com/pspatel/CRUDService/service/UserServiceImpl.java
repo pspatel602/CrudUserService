@@ -33,7 +33,9 @@ public class UserServiceImpl implements UserService {
     String verificationCode = RandomString.make(64);
     if (!orgRepository.existsByOrgName(userRequest.getOrganization().getOrgName())) {
       orgRepository.save(userRequest.getOrganization());
-    } else { System.out.println("Organization Already exist");}
+    } else {
+      System.out.println("Organization Already exist");
+    }
 
     User user =
         new User(
@@ -48,7 +50,10 @@ public class UserServiceImpl implements UserService {
     Set<Role> roles = new HashSet<>();
 
     if (strRoles == null) {
-      Role userRole = roleRepository.findByName(ERole.ROLE_USER).orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+      Role userRole =
+          roleRepository
+              .findByName(ERole.ROLE_USER)
+              .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
       roles.add(userRole);
     } else {
       strRoles.forEach(
@@ -75,7 +80,7 @@ public class UserServiceImpl implements UserService {
 
     user.setRoles(roles);
     repository.save(user);
-    emailSenderService.sendVerificationEmail(user, user.getEmail(), user.getVerificationCode());
+    emailSenderService.sendVerificationEmail(user, user.getEmail());
     return user;
   }
 
@@ -94,13 +99,13 @@ public class UserServiceImpl implements UserService {
             .orElseThrow(
                 () ->
                     new UserServiceCustomException(
-                        "User with given username (" + username + ") not " + "found",
-                        "USER_NOT_FOUND"));
+                        "User with given username not found", "USER_NOT_FOUND"));
 
     if (foundUser.isEnabled()) {
       return foundUser;
     }
-    throw new UserServiceCustomException("User with given username (" + username + ") is not enabled", "USER_IS_NOT_ENABLED");
+    throw new UserServiceCustomException(
+        "User with given username is not enabled", "USER_IS_NOT_ENABLED");
   }
 
   @Override

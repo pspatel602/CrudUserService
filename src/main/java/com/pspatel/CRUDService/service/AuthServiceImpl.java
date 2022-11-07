@@ -19,8 +19,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import net.bytebuddy.utility.RandomString;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -30,17 +33,17 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
-  private final EmailValidator emailValidator;
-  private final EmailSenderService emailSenderService;
-  private final AuthenticationManager authenticationManager;
-  private final JwtUtils jwtUtils;
-  private final PasswordEncoder encoder;
-  private final UserRepository userRepository;
-  private final RoleRepository roleRepository;
-  private final OrgRepository orgRepository;
+  private EmailValidator emailValidator;
+  private EmailSenderService emailSenderService;
+  private AuthenticationManager authenticationManager;
+  private JwtUtils jwtUtils;
+  private PasswordEncoder encoder;
+  private UserRepository userRepository;
+  private RoleRepository roleRepository;
+  private OrgRepository orgRepository;
 
   @Override
   public ResponseEntity<?> authenticateUser(LoginRequest loginRequest) {
@@ -128,7 +131,7 @@ public class AuthServiceImpl implements AuthService {
             }
           });
 
-      emailSenderService.sendVerificationEmail(user, user.getEmail(), user.getVerificationCode());
+      emailSenderService.sendVerificationEmail(user, user.getEmail());
     }
 
     user.setRoles(roles);

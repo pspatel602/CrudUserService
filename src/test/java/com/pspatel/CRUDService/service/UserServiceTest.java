@@ -1,6 +1,8 @@
 package com.pspatel.CRUDService.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
@@ -9,6 +11,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.pspatel.CRUDService.email.EmailSenderService;
+import com.pspatel.CRUDService.exception.InvalidEmailCustomException;
 import com.pspatel.CRUDService.exception.UserServiceCustomException;
 import com.pspatel.CRUDService.model.ERole;
 import com.pspatel.CRUDService.model.Organization;
@@ -115,10 +118,38 @@ public class UserServiceTest {
 
     User actualUser = userService.getUserByUsername("Jimmy Olsen");
 
-    // Assert
     assertThat(actualUser).usingRecursiveComparison().isEqualTo(expectedUser);
-    verify(userRepository, times(1)).findByUsername(anyString());
+    verify(userRepository, times(1)).findByUsername("Jimmy Olsen");
     verifyNoMoreInteractions(userRepository);
+
+    Exception exception =
+        assertThrows(
+            UserServiceCustomException.class,
+            () -> {
+              userService.getUserByUsername("Jimmy");
+            });
+
+    String expectedMessage = "User with given username not found";
+    String actualMessage = exception.getMessage();
+    assertTrue(actualMessage.contains(expectedMessage));
+  }
+
+  @Test
+  void throw_exception_when_user_is_disabled() {
+    User expectedDisabledUser =
+        User.builder().username("Jimmy").password("Jimmy@321").isEnabled(false).build();
+    when(userRepository.findByUsername("Jimmy")).thenReturn(Optional.of(expectedDisabledUser));
+
+    Exception exceptionDisabledUser =
+        assertThrows(
+            UserServiceCustomException.class,
+            () -> {
+              userService.getUserByUsername("Jimmy");
+            });
+
+    String exceptionDisabledUserMessage = "User with given username is not enabled";
+    String actualDisabledUserMessage = exceptionDisabledUser.getMessage();
+    assertTrue(actualDisabledUserMessage.contains(exceptionDisabledUserMessage));
   }
 
   @Test

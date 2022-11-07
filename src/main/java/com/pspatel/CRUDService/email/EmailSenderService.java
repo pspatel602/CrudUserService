@@ -13,7 +13,7 @@ public class EmailSenderService {
     this.mailSender = mailSender;
   }
 
-  public void sendVerificationEmail(User user, String toEmail, String token) {
+  public void sendVerificationEmail(User user, String toEmail) {
     String content =
         "Dear user ,"
             + user.getUsername()
