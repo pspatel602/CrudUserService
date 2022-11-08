@@ -89,7 +89,7 @@ public class UserControllerTest {
 
   @WithMockUser(username = "admin", password = "admin")
   @Test
-  public void createUserControllerTest() throws Exception {
+  public void testCreateUserControllerTest() throws Exception {
 
     String requestJson = mapper.writeValueAsString(userRequest);
 
@@ -103,7 +103,7 @@ public class UserControllerTest {
   }
 
   @Test
-  public void getAllUsers() throws Exception {
+  public void testGetAllUsers() throws Exception {
     when(userService.getUsers()).thenReturn(allUsers);
 
     mockMvc
@@ -114,7 +114,7 @@ public class UserControllerTest {
   }
 
   @Test
-  public void getUserById() throws Exception {
+  public void testGetUserById() throws Exception {
     when(userService.getUserByUsername("parth")).thenReturn(user);
 
     mockMvc
@@ -142,7 +142,7 @@ public class UserControllerTest {
   }
 
   @Test
-  public void updateUser() throws Exception {
+  public void testUpdateUser() throws Exception {
     user.setEmail("updatedEmail@gmail.com");
     when(userService.updateUserByUsername(user)).thenReturn(user);
     ObjectMapper mapper = new ObjectMapper();
@@ -174,25 +174,32 @@ public class UserControllerTest {
   }
 
   @Test
-  public void deleteUserById() throws Exception {
+  public void testDeleteUserById() throws Exception {
 
-    when(userService.deleteUserById(user.getId())).thenReturn("User " + user.getId() + " deleted "
-        + "successfully.");
+    when(userService.deleteUserById(user.getId()))
+        .thenReturn("User " + user.getId() + " deleted " + "successfully.");
 
-    mockMvc.perform(delete("/api/users/{userId}", user.getId())
-            .contentType(MediaType.APPLICATION_JSON))
+    mockMvc
+        .perform(
+            delete("/api/users/{userId}", user.getId()).contentType(MediaType.APPLICATION_JSON))
         .andExpect(content().string("User user01 deleted successfully."))
         .andExpect(status().isOk());
   }
 
-  public void should_throw_exception_in_getUserByUsername_when_user_doesnt_exist() throws Exception {
+  public void should_throw_exception_in_getUserByUsername_when_user_doesnt_exist()
+      throws Exception {
 
-    doThrow(new UserServiceCustomException( "User with given username (" + user.getUsername() + ")"
-        + " not " + "found",
-        "USER_NOT_FOUND")).when(userService).getUserByUsername(user.getUsername());
+    doThrow(
+            new UserServiceCustomException(
+                "User with given username (" + user.getUsername() + ")" + " not " + "found",
+                "USER_NOT_FOUND"))
+        .when(userService)
+        .getUserByUsername(user.getUsername());
 
-    mockMvc.perform(MockMvcRequestBuilders.get("/api/users/{}" + user.getId().toString())
-            .contentType(MediaType.APPLICATION_JSON))
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.get("/api/users/{}" + user.getId().toString())
+                .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound());
   }
 }

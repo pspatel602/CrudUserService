@@ -7,8 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
-@Builder
 public class JwtResponse {
   private String token;
   private String type = "Bearer";

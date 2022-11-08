@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -26,7 +27,8 @@ public class UserRequest {
   @Email
   private String email;
 
-  private Set<String> roles = new HashSet<>();;
+  private Set<String> roles = new HashSet<>();
+  ;
 
   @NotBlank
   @Size(min = 6, max = 40)
@@ -37,19 +39,4 @@ public class UserRequest {
 
   private boolean isEnabled;
   private Organization organization;
-
-  public UserRequest(
-      String username,
-      String email,
-      String password,
-      String verificationCode,
-      boolean isEnabled,
-      Organization org) {
-    this.username = username;
-    this.email = email;
-    this.password = password;
-    this.verificationCode = verificationCode;
-    this.isEnabled = isEnabled;
-    this.organization = org;
-  }
 }

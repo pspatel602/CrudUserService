@@ -70,7 +70,7 @@ public class AuthServiceTest {
   @BeforeEach
   void setup() {
     userDetailsService = new UserDetailsServiceImpl(userRepository);
-    loginRequest = new LoginRequest("admin", "admin");
+    loginRequest = new LoginRequest().builder().username("admin").password("admin").build();
     Set<String> rolesRequest = new HashSet<>(Arrays.asList("user", "admin"));
 
     signUpRequest =
@@ -92,10 +92,8 @@ public class AuthServiceTest {
     final User user = mock(User.class);
     when(userRepository.findByUsername(username)).thenReturn(Optional.ofNullable(user));
 
-    // Act
     final UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-    // Assert
     assertNotNull(userDetails);
     assertEquals(user.getUsername(), userDetails.getUsername());
   }
@@ -118,15 +116,6 @@ public class AuthServiceTest {
     when(SecurityContextHolder.getContext().getAuthentication().getPrincipal())
         .thenReturn(applicationUser);
     authService.authenticateUser(loginRequest);
-    String expectedJwt = jwtUtils.generateJwtToken(authentication);
-    System.out.println(expectedJwt);
-    System.out.println(
-        "authenticationManager.authenticate(authReq): "
-            + authenticationManager.authenticate(authReq));
-    System.out.println("authentication: " + authentication);
-    System.out.println(
-        "authService.authenticateUser(loginRequest): "
-            + authService.authenticateUser(loginRequest));
   }
 
   @Test
@@ -175,7 +164,7 @@ public class AuthServiceTest {
   }
 
   @Test
-  void verify() {
+  void testVerify() {
     String verificationCode = "valid_Verification_Code";
     User user = mock(User.class);
     when(userRepository.findByVerificationCode(verificationCode)).thenReturn(user);

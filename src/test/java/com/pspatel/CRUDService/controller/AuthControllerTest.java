@@ -112,7 +112,7 @@ public class AuthControllerTest {
   }
 
   @Test
-  public void mockApplicationUser() {
+  public void testMockApplicationUser() {
     UserDetailsImpl applicationUser = mock(UserDetailsImpl.class);
     Authentication authentication = mock(Authentication.class);
     SecurityContext securityContext = mock(SecurityContext.class);

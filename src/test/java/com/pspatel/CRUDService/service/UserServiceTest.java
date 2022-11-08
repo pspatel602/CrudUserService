@@ -102,7 +102,7 @@ public class UserServiceTest {
   }
 
   @Test
-  public void getUsersTest() {
+  public void testGetUsers() {
     when(userRepository.findAll()).thenReturn(List.of(new User(), new User()));
     assertThat(userService.getUsers()).hasSize(2);
     verify(userRepository, times(1)).findAll();
@@ -110,7 +110,7 @@ public class UserServiceTest {
   }
 
   @Test
-  public void getUserByUsernameTest() {
+  public void testGetUserByUsername() {
     User expectedUser =
         User.builder().username("Jimmy Olsen").password("Jimmy@321").isEnabled(true).build();
 
@@ -176,7 +176,7 @@ public class UserServiceTest {
   }
 
   @Test
-  public void deleteUserByIdTest() {
+  public void testDeleteUserById() {
 
     doNothing().when(userRepository).deleteByUsername(user.getId());
     userService.deleteUserById(user.getId());

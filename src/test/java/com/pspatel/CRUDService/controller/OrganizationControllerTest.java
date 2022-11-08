@@ -47,7 +47,7 @@ public class OrganizationControllerTest {
 
   @WithMockUser(username = "admin", password = "admin")
   @Test
-  public void createOrg() throws Exception {
+  public void testCreateOrg() throws Exception {
 
     System.out.println(org);
     System.out.println(mapper.writeValueAsString(org));
@@ -63,7 +63,7 @@ public class OrganizationControllerTest {
   }
 
   @Test
-  void getAllOrgsTest() throws Exception {
+  void testGetAllOrgs() throws Exception {
     when(orgService.getOrganizations()).thenReturn(allOrgs);
 
     mockMvc
@@ -75,7 +75,7 @@ public class OrganizationControllerTest {
   }
 
   @Test
-  void getOrgByIdTest() throws Exception {
+  void testGetOrgById() throws Exception {
     when(orgService.getOrganizationById("PE01")).thenReturn(org);
 
     mockMvc
@@ -88,7 +88,7 @@ public class OrganizationControllerTest {
   }
 
   @Test
-  void getOrgByNameTest() throws Exception {
+  void testGetOrgByName() throws Exception {
     when(orgService.getOrganizationByName("Apple Inc.")).thenReturn(org);
 
     mockMvc
@@ -101,7 +101,7 @@ public class OrganizationControllerTest {
   }
 
   @Test
-  void updateOrganizationTest() throws Exception {
+  void testUpdateOrganization() throws Exception {
     org.setLocation("India");
     when(orgService.updateOrganization(org)).thenReturn(org);
     ObjectMapper mapper = new ObjectMapper();
@@ -115,7 +115,7 @@ public class OrganizationControllerTest {
   }
 
   @Test
-  void deleteOrgTest() throws Exception {
+  void testDeleteOrg() throws Exception {
     when(orgService.deleteOrganizationById(org.getId()))
         .thenReturn("Organization with given id " + org.getId() + " deleted successfully");
 

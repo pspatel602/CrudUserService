@@ -20,7 +20,7 @@ public class JwtUtils {
   private String jwtSecret = "patelSecretKey";
 
   public String generateJwtToken(Authentication authentication) {
-
+    System.out.println("Authentication: " + authentication);
     UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
 
     return Jwts.builder()

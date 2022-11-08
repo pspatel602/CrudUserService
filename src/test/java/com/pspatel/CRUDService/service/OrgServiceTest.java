@@ -67,7 +67,7 @@ public class OrgServiceTest {
   }
 
   @Test
-  public void getOrganizationByOrgNameTest() {
+  public void testGetOrganizationByOrgName() {
     Organization expectedOrg = new Organization("PE02", "Expected Inc.", "United States");
 
     when(orgRepository.findByOrgName("Expected Inc.")).thenReturn(expectedOrg);
@@ -81,7 +81,7 @@ public class OrgServiceTest {
   }
 
   @Test
-  public void updateOrgByUsernameTest() {
+  public void testUpdateOrgByUsername() {
 
     when(orgRepository.findById("PE01")).thenReturn(Optional.ofNullable(organization));
     when(orgRepository.save(ArgumentMatchers.any(Organization.class))).thenReturn(organization);
@@ -100,7 +100,7 @@ public class OrgServiceTest {
   }
 
   @Test
-  public void deleteOrganizationByIdTest() {
+  public void testDeleteOrganizationById() {
 
     doNothing().when(orgRepository).deleteById(organization.getId());
     orgService.deleteOrganizationById(organization.getId());
