@@ -25,7 +25,6 @@ import com.pspatel.CRUDService.security.services.UserDetailsServiceImpl;
 public class WebSecurityConfig {
   private final UserDetailsServiceImpl userDetailsService;
   private final AuthEntryPointJwt unauthorizedHandler;
-
   private final JwtUtils jwtUtils;
 
   @Bean

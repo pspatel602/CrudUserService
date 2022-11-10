@@ -140,7 +140,7 @@ public class AuthServiceTest {
         ResponseEntity.badRequest()
             .body(
                 new MessageResponse(
-                    "Error: Email is already taken by someone else. Please "
+                      "Error: Email is already taken by someone else. Please "
                         + "Enter different email!"));
 
     when(emailValidator.test(signUpRequest.getEmail())).thenReturn(true);

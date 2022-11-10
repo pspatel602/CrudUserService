@@ -1,6 +1,7 @@
 package com.pspatel.CRUDService.service;
 
 import com.pspatel.CRUDService.email.EmailSenderService;
+import com.pspatel.CRUDService.email.EmailValidator;
 import com.pspatel.CRUDService.exception.InvalidEmailCustomException;
 import com.pspatel.CRUDService.model.ERole;
 import com.pspatel.CRUDService.model.Role;
@@ -12,18 +13,15 @@ import com.pspatel.CRUDService.payload.response.MessageResponse;
 import com.pspatel.CRUDService.repository.OrgRepository;
 import com.pspatel.CRUDService.repository.RoleRepository;
 import com.pspatel.CRUDService.repository.UserRepository;
-import com.pspatel.CRUDService.email.EmailValidator;
 import com.pspatel.CRUDService.security.jwt.JwtUtils;
 import com.pspatel.CRUDService.security.services.UserDetailsImpl;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import net.bytebuddy.utility.RandomString;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -103,6 +101,11 @@ public class AuthServiceImpl implements AuthService {
     Set<String> strRoles = signUpRequest.getRoles();
     Set<Role> roles = new HashSet<>();
 
+    if (!(roleRepository.existsByName(ERole.ROLE_ADMIN)
+        || roleRepository.existsByName(ERole.ROLE_USER))) {
+      roleRepository.save(new Role(UUID.randomUUID().toString(), ERole.ROLE_USER));
+      roleRepository.save(new Role(UUID.randomUUID().toString(), ERole.ROLE_ADMIN));
+    }
     if (strRoles == null) {
       Role userRole =
           roleRepository

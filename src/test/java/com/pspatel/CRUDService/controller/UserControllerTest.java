@@ -107,7 +107,8 @@ public class UserControllerTest {
     when(userService.getUsers()).thenReturn(allUsers);
 
     mockMvc
-        .perform(MockMvcRequestBuilders.get("/api/users/").contentType(MediaType.APPLICATION_JSON))
+        .perform(MockMvcRequestBuilders.get("/api/users/")
+            .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$", hasSize(1)))
         .andExpect(jsonPath("$[0].username", is(user.getUsername())));

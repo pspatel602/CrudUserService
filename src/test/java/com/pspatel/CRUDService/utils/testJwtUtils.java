@@ -35,7 +35,6 @@ public class testJwtUtils {
   @MockBean private Authentication authentication;
   @MockBean private UserDetailsImpl userDetails;
   @MockBean private UserDetailsServiceImpl userDetailsServiceImpl;
-
   @InjectMocks private JwtUtils jwtUtils;
 
   @BeforeEach
