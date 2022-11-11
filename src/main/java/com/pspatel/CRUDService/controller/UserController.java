@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@RequestMapping("/api/users")
+  @RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserController {
 
@@ -47,7 +47,7 @@ public class UserController {
   }
 
   @GetMapping("/{userId}")
-  @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
   @ApiOperation(value = "Find user by Id")
   @Cacheable(value = "users", key = "#userId")
   public User getUserById(

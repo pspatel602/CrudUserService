@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pspatel.CRUDService.model.Organization;
+import com.pspatel.CRUDService.security.WebSecurityConfig;
 import com.pspatel.CRUDService.service.OrgServiceImpl;
 import java.util.Arrays;
 import java.util.List;
@@ -20,22 +21,29 @@ import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 @WebMvcTest(OrganizationController.class)
+@TestPropertySource(locations = "classpath:test-application.yml")
 @AutoConfigureMockMvc(addFilters = false)
 public class OrganizationControllerTest {
+
+  static {
+    System.setProperty("spring.mongodb.embedded.version", "4.0.2");
+  }
+
+  @MockBean private WebSecurityConfig webSecurityConfig;
+
   @MockBean private OrgServiceImpl orgService;
-
   @InjectMocks private OrganizationController organizationController;
-
   @Autowired private MockMvc mockMvc;
   @Autowired private ObjectMapper mapper;
-
   private List<Organization> allOrgs;
   private Organization org;
 
@@ -60,6 +68,9 @@ public class OrganizationControllerTest {
                 .characterEncoding("utf-8"))
         .andExpect(status().isCreated())
         .andReturn();
+
+    Organization expectedOrg = orgService.getOrganizationByName(org.getOrgName());
+    System.out.println("expectedOrg: " + expectedOrg);
   }
 
   @Test

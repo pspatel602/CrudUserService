@@ -4,11 +4,9 @@ spring:
     mongodb:
       embedded:
         version=4:0:2
-      #database: test
+      database: test
       host: localhost
       port: 27017
-      #uri: mongodb+srv://admin:admin@pspatel.dkytwcf.mongodb.net/?retryWrites=true&w=majority
-      #database: user_db
 
 
   #Mongo-Atlas Configuration

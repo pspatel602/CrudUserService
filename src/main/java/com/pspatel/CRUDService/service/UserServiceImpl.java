@@ -43,15 +43,15 @@ public class UserServiceImpl implements UserService {
             userRequest.getEmail(),
             encoder.encode(userRequest.getPassword()),
             verificationCode,
-            false,
+            userRequest.isEnabled(),
             userRequest.getOrganization());
 
     Set<String> strRoles = userRequest.getRoles();
+    System.out.println("strRoles: " + strRoles);
     Set<Role> roles = new HashSet<>();
 
     if (strRoles == null) {
-      Role userRole =
-          roleRepository
+      Role userRole = roleRepository
               .findByName(ERole.ROLE_USER)
               .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
       roles.add(userRole);

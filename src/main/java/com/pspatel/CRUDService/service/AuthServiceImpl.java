@@ -95,7 +95,7 @@ public class AuthServiceImpl implements AuthService {
             signUpRequest.getEmail(),
             encoder.encode(signUpRequest.getPassword()),
             verificationCode,
-            false,
+            signUpRequest.isEnabled(),
             signUpRequest.getOrganization());
 
     Set<String> strRoles = signUpRequest.getRoles();
