@@ -1,23 +1,11 @@
 spring:
-  #Embedded Mongodb Configuration
   data:
     mongodb:
       embedded:
-        version=4:0:2
+        version=5.0.0
       database: test
       host: localhost
       port: 27017
-
-
-  #Mongo-Atlas Configuration
-  # Database Link: mongodb+srv://admin:admin@pspatel.dkytwcf.mongodb.net/?retryWrites=true&w=majority
-  #      mongodb:
-  #        embedded:
-  #          version=4:0:2
-  #        uri: mongodb+srv://admin:admin@pspatel.dkytwcf.mongodb.net/?retryWrites=true&w=majority
-  #        database: user_db
-  #        host: localhost
-  #        port: 27017
 
   mail:
     host: smtp.gmail.com

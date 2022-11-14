@@ -15,8 +15,10 @@ import com.pspatel.CRUDService.model.User;
 import com.pspatel.CRUDService.payload.request.LoginRequest;
 import com.pspatel.CRUDService.payload.request.SignupRequest;
 import com.pspatel.CRUDService.payload.request.UserRequest;
+import com.pspatel.CRUDService.payload.response.JwtResponse;
 import com.pspatel.CRUDService.repository.RoleRepository;
 import com.pspatel.CRUDService.repository.UserRepository;
+import com.pspatel.CRUDService.security.jwt.JwtUtils;
 import com.pspatel.CRUDService.security.services.UserDetailsServiceImpl;
 import com.pspatel.CRUDService.service.AuthServiceImpl;
 import com.pspatel.CRUDService.service.UserServiceImpl;
@@ -55,14 +57,15 @@ public class CrudServiceApplicationIntegrationTest {
   @Autowired private RoleRepository roleRepository;
   private UserRequest userRequest;
   private User user;
-
-  // Required properties for AuthServiceImpl
   @Autowired private AuthServiceImpl authService;
   @Autowired private AuthenticationManager authenticationManager;
+
+  @Autowired private JwtUtils jwtUtils;
   @Autowired private UserDetailsServiceImpl userDetailsService;
   private LoginRequest loginRequest;
 
   private SignupRequest signUpRequest;
+  private Organization newOrg;
 
   @BeforeEach
   void setup() {
@@ -86,7 +89,7 @@ public class CrudServiceApplicationIntegrationTest {
             .isEnabled(true)
             .organization(new Organization("PE01", "Dell Inc.", "India"))
             .build();
-    Organization newOrg = new Organization("PE01", "Dell Inc.", "India");
+    newOrg = new Organization("PE01", "Dell Inc.", "India");
     userRequest.setRoles(rolesRequest);
     userRequest.setOrganization(newOrg);
     user = new User();
@@ -131,36 +134,21 @@ public class CrudServiceApplicationIntegrationTest {
     assertTrue(isUserExist);
   }
 
-  @Order(9)
+  @Order(2)
   @Test
   public void test_add_user_without_role() {
-    UserRequest userRequestWithoutRole = new UserRequest();
-    userRequestWithoutRole =
-        userRequestWithoutRole
-            .builder()
-            .username("rajesh")
-            .email("p7600204790@gmail.com")
-            .password("parth@321")
-            .verificationCode("123456789")
-            .roles(null)
-            .isEnabled(true)
-            .organization(new Organization("PE01", "HP Inc.", "USA"))
-            .build();
-    System.out.println("userRequestWithoutRole Roles :" + userRequestWithoutRole.getRoles());
-    System.out.println("userRequestWithoutRole: " + userRequestWithoutRole);
+    UserRequest userRequestWithoutRole =
+        new UserRequest(
+            "rajesh", "p7600204790@gmail.com", null, "parth@321", "123456789", true, newOrg);
     boolean isExist = userRepository.existsByUsername(userRequestWithoutRole.getUsername());
     assertFalse(isExist);
     userService.addUser(userRequestWithoutRole);
     boolean isUserExist = userRepository.existsByUsername(userRequestWithoutRole.getUsername());
-    System.out.println("isUserExist:" + isUserExist);
-    System.out.println(
-        "User details after saving: "
-            + userService.getUserByUsername(userRequestWithoutRole.getUsername()));
     assertTrue(isUserExist);
   }
 
   @Test
-  @Order(2)
+  @Order(3)
   public void test_getUsers() {
     List<User> allUsers = userRepository.findAll();
     System.out.println(allUsers);
@@ -169,7 +157,7 @@ public class CrudServiceApplicationIntegrationTest {
   }
 
   @Test
-  @Order(3)
+  @Order(4)
   public void test_getUserByUsername() {
     User actualUser = userService.getUserByUsername(userRequest.getUsername());
     assertEquals(userRequest.getUsername(), actualUser.getUsername());
@@ -177,7 +165,7 @@ public class CrudServiceApplicationIntegrationTest {
   }
 
   @Test
-  @Order(4)
+  @Order(5)
   public void test_updateUserByUsername() {
 
     User actualUser = userService.getUserByUsername(user.getUsername());
@@ -191,17 +179,30 @@ public class CrudServiceApplicationIntegrationTest {
   }
 
   @Test
-  @Order(5)
+  @Order(6)
   public void test_deleteUserById() {
-    boolean isUserExist = userRepository.existsByUsername(userRequest.getUsername());
+    User newUser =
+        new User()
+            .builder()
+            .id(Arrays.stream(UUID.randomUUID().toString().split("-")).toArray()[0].toString())
+            .username("mahesh")
+            .email("pspatel602@gmail.com")
+            .password("parth@321")
+            .verificationCode("123456789")
+            .isEnabled(true)
+            .organization(new Organization("PE01", "Dell Inc.", "India"))
+            .build();
+
+    userRepository.save(newUser);
+    boolean isUserExist = userRepository.existsByUsername(newUser.getUsername());
     assertTrue(isUserExist);
-    userService.deleteUserById(userRequest.getUsername());
-    isUserExist = userRepository.existsByUsername(userRequest.getUsername());
+    userService.deleteUserById(newUser.getUsername());
+    isUserExist = userRepository.existsByUsername(newUser.getUsername());
     assertFalse(isUserExist);
   }
 
   @Test
-  @Order(6)
+  @Order(7)
   public void test_registerUser() {
     ResponseEntity actualRes = authService.registerUser(signUpRequest);
 
@@ -211,24 +212,27 @@ public class CrudServiceApplicationIntegrationTest {
   }
 
   @Test
-  @Order(7)
+  @Order(8)
   public void test_AuthenticateUser() {
     assertThrows(
         BadCredentialsException.class,
         () -> {
           authService.authenticateUser(loginRequest);
         });
+    LoginRequest loginRequest1 =
+        new LoginRequest(signUpRequest.getUsername(), signUpRequest.getPassword());
     authService.registerUser(signUpRequest);
-    ResponseEntity actualRes = authService.authenticateUser(loginRequest);
-    System.out.println("actualRes:" + actualRes);
-    System.out.println("actualRes body: " + actualRes.getBody());
-    System.out.println("actualRes Headers: " + actualRes.getHeaders());
-
+    ResponseEntity actualRes = authService.authenticateUser(loginRequest1);
+    JwtResponse jwtResponse = (JwtResponse) actualRes.getBody();
+    System.out.println(jwtResponse);
+    System.out.println(jwtResponse.getToken());
+    Boolean isValidToken = jwtUtils.validateJwtToken(jwtResponse.getToken());
+    assertTrue(isValidToken);
     assertThat(actualRes.getStatusCode()).isEqualTo(HttpStatus.OK);
   }
 
   @Test
-  @Order(8)
+  @Order(9)
   void test_Verify() {
     user.setEnabled(false);
     userRepository.save(user);
@@ -243,12 +247,11 @@ public class CrudServiceApplicationIntegrationTest {
     System.out.println(isValidToken);
     assertTrue(isValidToken);
     User activatedUser = userService.getUserByUsername(user.getUsername());
-    System.out.println("activatedUser enabled status: " + activatedUser.isEnabled());
     assertTrue(activatedUser.isEnabled());
   }
 
   @Test
-  @Order(9)
+  @Order(10)
   public void test_registerUser_without_role() {
     SignupRequest signupRequestWithoutRole = new SignupRequest();
 

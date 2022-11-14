@@ -2,6 +2,8 @@ package com.pspatel.CRUDService;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -9,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pspatel.CRUDService.controller.AuthController;
+import com.pspatel.CRUDService.exception.UserServiceCustomException;
 import com.pspatel.CRUDService.model.ERole;
 import com.pspatel.CRUDService.model.Organization;
 import com.pspatel.CRUDService.model.Role;
@@ -28,6 +31,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -36,9 +40,6 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -55,10 +56,6 @@ public class CrudControllerIntegrationTest {
   static {
     System.setProperty("spring.mongodb.embedded.version", "5.0.0");
   }
-
-  TestRestTemplate restTemplate = new TestRestTemplate();
-  HttpHeaders headers = new HttpHeaders();
-  @LocalServerPort private int port;
 
   @Autowired private UserServiceImpl userService;
   @Autowired private UserRepository userRepository;
@@ -91,7 +88,21 @@ public class CrudControllerIntegrationTest {
     roleRepository.save(user_role);
 
     roles.add(admin);
-    userRequest = new UserRequest();
+
+    signUpRequest =
+        new SignupRequest()
+            .builder()
+            .username("admin")
+            .email("pparth602@yahoo.com")
+            .password("admin")
+            .enabled(true)
+            .verificationCode("12345")
+            .roles(rolesRequest)
+            .organization(new Organization("PE01", "Apple Inc.", "United States"))
+            .build();
+
+    loginRequest = new LoginRequest().builder().username("admin").password("admin").build();
+
     userRequest =
         new UserRequest()
             .builder()
@@ -106,10 +117,10 @@ public class CrudControllerIntegrationTest {
     Organization newOrg = new Organization("PE01", "Dell Inc.", "India");
     userRequest.setRoles(rolesRequest);
     userRequest.setOrganization(newOrg);
-    user = new User();
     user =
         new User()
             .builder()
+            .id(Arrays.stream(UUID.randomUUID().toString().split("-")).toArray()[0].toString())
             .username(userRequest.getUsername())
             .email(userRequest.getEmail())
             .password(userRequest.getPassword())
@@ -121,27 +132,18 @@ public class CrudControllerIntegrationTest {
 
     // AuthServiceImpl Setup
     userDetailsService = new UserDetailsServiceImpl(userRepository);
-    loginRequest = new LoginRequest().builder().username("admin").password("admin").build();
-
-    signUpRequest =
-        new SignupRequest()
-            .builder()
-            .username("admin")
-            .email("pparth602@yahoo.com")
-            .password("admin")
-            .enabled(true)
-            .verificationCode("12345")
-            .roles(rolesRequest)
-            .organization(new Organization("PE01", "Apple Inc.", "United States"))
-            .build();
-
     newOrganization = new Organization(UUID.randomUUID().toString(), "Tata", "India");
+
+    System.out.println("==============In Setup==============");
+    System.out.println("In Setup: " + signUpRequest.toString());
+    System.out.println("In Setup: " + loginRequest.toString());
+    System.out.println("In Setup: " + userRequest.toString());
+    System.out.println("In Setup: " + user.toString());
   }
 
   @Test
   @Order(1)
   public void testRegisterUser() throws Exception {
-    userRepository.deleteAll();
     mockMvc
         .perform(
             post("/api/auth/signup")
@@ -156,6 +158,7 @@ public class CrudControllerIntegrationTest {
   @Order(2)
   @Test
   void testSignIn() throws Exception {
+    authService.registerUser(signUpRequest);
     MvcResult result =
         mockMvc
             .perform(
@@ -175,14 +178,13 @@ public class CrudControllerIntegrationTest {
   @Test
   @Order(3)
   public void testCreateUserControllerTest() throws Exception {
-
-    String requestJson = mapper.writeValueAsString(userRequest);
-
+    System.out.println("In testCreateUserControllerTest: " + userRequest.toString());
     mockMvc
         .perform(
-            post("/api/users")
+            post("/api/users", user)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(String.valueOf(requestJson)))
+                .content(mapper.writeValueAsString(userRequest))
+                .characterEncoding("utf-8"))
         .andExpect(status().isCreated())
         .andReturn();
     Boolean isUserCreated = userRepository.existsByUsername(userRequest.getUsername());
@@ -195,7 +197,10 @@ public class CrudControllerIntegrationTest {
   public void testGetAllUsers() throws Exception {
     List<User> expectedUser = userService.getUsers();
     mockMvc
-        .perform(MockMvcRequestBuilders.get("/api/users/").contentType(MediaType.APPLICATION_JSON))
+        .perform(
+            MockMvcRequestBuilders.get("/api/users/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .characterEncoding("utf-8"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$", hasSize(1)))
         .andExpect(jsonPath("$[0].username", is(expectedUser.get(0).getUsername())));
@@ -205,13 +210,45 @@ public class CrudControllerIntegrationTest {
   @Order(5)
   @WithMockUser(username = "admin", password = "admin", roles = "admin")
   public void testGetUserById() throws Exception {
-    User expectedUser = userService.getUserByUsername(userRequest.getUsername());
+    authService.authenticateUser(loginRequest);
+    User expectedUser = userService.getUserByUsername(loginRequest.getUsername());
     System.out.println("expectedUser: " + expectedUser);
     mockMvc
         .perform(
-            MockMvcRequestBuilders.get("/api/users/{userId}", "parth")
-                .contentType(MediaType.APPLICATION_JSON))
+            MockMvcRequestBuilders.get("/api/users/{userId}", loginRequest.getUsername())
+                .contentType(MediaType.APPLICATION_JSON)
+                .characterEncoding("utf-8"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.username", is(expectedUser.getUsername())));
+  }
+
+  @Test
+  @WithMockUser(username = "admin", password = "admin")
+  @Order(6)
+  void testDeleteUser() throws Exception {
+    User newUser =
+        new User()
+            .builder()
+            .id(Arrays.stream(UUID.randomUUID().toString().split("-")).toArray()[0].toString())
+            .username("mahesh")
+            .email("pspatel602@gmail.com")
+            .password("parth@321")
+            .verificationCode("123456789")
+            .isEnabled(true)
+            .organization(new Organization("PE01", "Dell Inc.", "India"))
+            .build();
+
+    userRepository.save(newUser);
+    Boolean isUserExist = userRepository.existsByUsername(newUser.getUsername());
+    assertTrue(isUserExist);
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.get("/api/users/{userId}", loginRequest.getUsername())
+                .contentType(MediaType.APPLICATION_JSON)
+                .characterEncoding("utf-8"))
+        .andExpect(status().isOk());
+
+    isUserExist = userRepository.existsByUsername(userRequest.getUsername());
+    assertFalse(isUserExist);
   }
 }
