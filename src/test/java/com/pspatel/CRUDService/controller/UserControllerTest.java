@@ -37,7 +37,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 @WebMvcTest(UserController.class)
-@TestPropertySource(locations = "classpath:test-application.yml")
+@TestPropertySource(locations = "classpath:application.yml")
 @AutoConfigureMockMvc(addFilters = false)
 public class UserControllerTest {
   @MockBean private UserServiceImpl userService;

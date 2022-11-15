@@ -30,7 +30,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 @WebMvcTest(OrganizationController.class)
-@TestPropertySource(locations = "classpath:test-application.yml")
+@TestPropertySource(locations = "classpath:application.yml")
 @AutoConfigureMockMvc(addFilters = false)
 public class OrganizationControllerTest {
 
