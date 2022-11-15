@@ -1,11 +1,6 @@
 package com.pspatel.CRUDService;
 
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.core.Is.is;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,10 +18,10 @@ import com.pspatel.CRUDService.repository.RoleRepository;
 import com.pspatel.CRUDService.repository.UserRepository;
 import com.pspatel.CRUDService.security.services.UserDetailsServiceImpl;
 import com.pspatel.CRUDService.service.AuthServiceImpl;
+import com.pspatel.CRUDService.service.OrgServiceImpl;
 import com.pspatel.CRUDService.service.UserServiceImpl;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterAll;
@@ -44,37 +39,42 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.MvcResult;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource(locations = "classpath:test-application.yml")
 @AutoConfigureMockMvc(addFilters = false)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class CrudControllerIntegrationTest {
+public class CrudAuthControllerIntegrationTest {
   static {
     System.setProperty("spring.mongodb.embedded.version", "5.0.0");
   }
 
-  @MockBean private EmailSenderService emailSenderService;
   @Autowired private UserServiceImpl userService;
   @Autowired private UserRepository userRepository;
   @Autowired private RoleRepository roleRepository;
   @Autowired private AuthController authController;
   @Autowired private MockMvc mockMvc;
+  @MockBean private EmailSenderService emailSenderService;
   @Autowired private ObjectMapper mapper;
   private UserRequest userRequest;
   private User user;
+
   @Autowired private AuthServiceImpl authService;
   @Autowired private AuthenticationManager authenticationManager;
   @Autowired private UserDetailsServiceImpl userDetailsService;
+  @Autowired private OrgServiceImpl orgService;
   @Autowired private OrgRepository orgRepository;
+
   private LoginRequest loginRequest;
   private SignupRequest signUpRequest;
+  private Organization newOrganization;
 
-  @BeforeAll
+  @BeforeEach
   public void setupAll() {
     Set<Role> roles = new HashSet<>();
     Set<String> rolesRequest = new HashSet<>(Arrays.asList("user", "admin"));
@@ -127,15 +127,9 @@ public class CrudControllerIntegrationTest {
 
   @AfterAll
   public void teardownAll() {
-    roleRepository.deleteAll();
-    //userRepository.deleteAll();
+    userRepository.deleteAll();
     orgRepository.deleteAll();
-  }
-
-  @BeforeEach
-  void beforeEach() {
-    authService.registerUser(signUpRequest);
-    authService.authenticateUser(loginRequest);
+    roleRepository.deleteAll();
   }
 
   @AfterEach
@@ -145,76 +139,30 @@ public class CrudControllerIntegrationTest {
 
   @Test
   @Order(1)
-  public void testCreateUserControllerTest() throws Exception {
-
+  public void testRegisterUser() throws Exception {
+    userRepository.deleteAll();
     mockMvc
         .perform(
-            post("/api/users", user)
+            post("/api/auth/signup")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(userRequest))
+                .content(mapper.writeValueAsString(signUpRequest))
                 .characterEncoding("utf-8"))
-        .andExpect(status().isCreated())
+        .andExpect(status().isOk())
         .andReturn();
-    Boolean isUserCreated = userRepository.existsByUsername(userRequest.getUsername());
-    assertTrue(isUserCreated);
   }
 
-  @Test
   @Order(2)
-  public void testGetAllUsers() throws Exception {
-    List<User> expectedUser = userService.getUsers();
-    mockMvc
-        .perform(
-            MockMvcRequestBuilders.get("/api/users/")
-                .contentType(MediaType.APPLICATION_JSON)
-                .characterEncoding("utf-8"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$", hasSize(1)))
-        .andExpect(jsonPath("$[0].username", is(expectedUser.get(0).getUsername())));
-  }
-
   @Test
-  @Order(3)
-  public void testGetUserById() throws Exception {
-
-    User expectedUser = userService.getUserByUsername(loginRequest.getUsername());
-    System.out.println("expectedUser: " + expectedUser);
-    mockMvc
-        .perform(
-            MockMvcRequestBuilders.get("/api/users/{userId}", loginRequest.getUsername())
-                .contentType(MediaType.APPLICATION_JSON)
-                .characterEncoding("utf-8"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.username", is(expectedUser.getUsername())));
-  }
-
-  @Test
-  @Order(4)
-  void testDeleteUser() throws Exception {
-
-    User newUser =
-        new User()
-            .builder()
-            .id(Arrays.stream(UUID.randomUUID().toString().split("-")).toArray()[0].toString())
-            .username("mahesh")
-            .email("pspatel602@gmail.com")
-            .password("parth@321")
-            .verificationCode("123456789")
-            .isEnabled(true)
-            .organization(new Organization("PE01", "Dell Inc.", "India"))
-            .build();
-
-    userRepository.save(newUser);
-    Boolean isUserExist = userRepository.existsByUsername(newUser.getUsername());
-    assertTrue(isUserExist);
-    mockMvc
-        .perform(
-            MockMvcRequestBuilders.delete("/api/users/{userId}", newUser.getUsername())
-                .contentType(MediaType.APPLICATION_JSON)
-                .characterEncoding("utf-8"))
-        .andExpect(status().isOk());
-
-    isUserExist = userRepository.existsByUsername(newUser.getUsername());
-    assertFalse(isUserExist);
+  void testSignIn() throws Exception {
+    authService.registerUser(signUpRequest);
+    MvcResult result =
+        mockMvc
+            .perform(
+                post("/api/auth/signin")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(mapper.writeValueAsString(loginRequest))
+                    .characterEncoding("utf-8"))
+            .andExpect(status().isOk())
+            .andReturn();
   }
 }

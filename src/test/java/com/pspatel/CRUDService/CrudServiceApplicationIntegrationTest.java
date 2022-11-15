@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.pspatel.CRUDService.email.EmailSenderService;
 import com.pspatel.CRUDService.exception.UserServiceCustomException;
 import com.pspatel.CRUDService.model.ERole;
 import com.pspatel.CRUDService.model.Organization;
@@ -27,14 +28,19 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -45,6 +51,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestPropertySource(locations = "classpath:test-application.yml")
 public class CrudServiceApplicationIntegrationTest {
 
@@ -52,13 +59,15 @@ public class CrudServiceApplicationIntegrationTest {
     System.setProperty("spring.mongodb.embedded.version", "5.0.0");
   }
 
+  @MockBean private EmailSenderService emailSenderService;
   @Autowired private UserServiceImpl userService;
   @Autowired private UserRepository userRepository;
   @Autowired private RoleRepository roleRepository;
-  private UserRequest userRequest;
-  private User user;
+
   @Autowired private AuthServiceImpl authService;
   @Autowired private AuthenticationManager authenticationManager;
+  private UserRequest userRequest;
+  private User user;
 
   @Autowired private JwtUtils jwtUtils;
   @Autowired private UserDetailsServiceImpl userDetailsService;
@@ -67,59 +76,75 @@ public class CrudServiceApplicationIntegrationTest {
   private SignupRequest signUpRequest;
   private Organization newOrg;
 
-  @BeforeEach
-  void setup() {
+  @BeforeAll
+  public void setup() {
     Set<Role> roles = new HashSet<>();
     Set<String> rolesRequest = new HashSet<>(Arrays.asList("user", "admin"));
-    Role admin = new Role(UUID.randomUUID().toString(), ERole.ROLE_ADMIN);
-    Role user_role = new Role(UUID.randomUUID().toString(), ERole.ROLE_USER);
+    Role admin = new Role("__ADMIN__", ERole.ROLE_ADMIN);
+    Role user_role = new Role("__USER__", ERole.ROLE_USER);
     roleRepository.save(admin);
     roleRepository.save(user_role);
 
     roles.add(admin);
+    signUpRequest = new SignupRequest();
+
+    signUpRequest.setUsername("admin");
+    signUpRequest.setEmail("pparth602@yahoo.com");
+    signUpRequest.setPassword("admin");
+    signUpRequest.setEnabled(true);
+    signUpRequest.setVerificationCode("12345");
+    signUpRequest.setRoles(rolesRequest);
+    signUpRequest.setOrganization(new Organization("PE01", "Apple Inc.", "United States"));
+
+    loginRequest = new LoginRequest();
+    loginRequest.setUsername("admin");
+    loginRequest.setPassword("admin");
+
     userRequest = new UserRequest();
-    userRequest =
-        new UserRequest()
-            .builder()
-            .username("parth")
-            .email("pspatel602@gmail.com")
-            .password("parth@321")
-            .verificationCode("123456789")
-            .roles(rolesRequest)
-            .isEnabled(true)
-            .organization(new Organization("PE01", "Dell Inc.", "India"))
-            .build();
-    newOrg = new Organization("PE01", "Dell Inc.", "India");
+
+    userRequest.setUsername("parth");
+    userRequest.setEmail("pspatel602@gmail.com");
+    userRequest.setPassword("parth@321");
+    userRequest.setVerificationCode("123456789");
+    userRequest.setRoles(rolesRequest);
+    userRequest.setEnabled(true);
+    userRequest.setOrganization(new Organization("PE01", "Dell Inc.", "India"));
+
+    Organization newOrg = new Organization("PE01", "Dell Inc.", "India");
     userRequest.setRoles(rolesRequest);
     userRequest.setOrganization(newOrg);
+
     user = new User();
-    user =
-        new User()
-            .builder()
-            .username(userRequest.getUsername())
-            .email(userRequest.getEmail())
-            .password(userRequest.getPassword())
-            .verificationCode(userRequest.getVerificationCode())
-            .isEnabled(userRequest.isEnabled())
-            .roles(roles)
-            .organization(userRequest.getOrganization())
-            .build();
+    user.setId(Arrays.stream(UUID.randomUUID().toString().split("-")).toArray()[0].toString());
+    user.setUsername(userRequest.getUsername());
+    user.setEmail(userRequest.getEmail());
+    user.setPassword(userRequest.getPassword());
+    user.setVerificationCode(userRequest.getVerificationCode());
+    user.setEnabled(userRequest.isEnabled());
+    user.setRoles(roles);
+    user.setOrganization(userRequest.getOrganization());
 
-    // AuthServiceImpl Setup
     userDetailsService = new UserDetailsServiceImpl(userRepository);
-    loginRequest = new LoginRequest().builder().username("admin").password("admin").build();
+    newOrg = new Organization();
+    newOrg.setOrgName("Tata Boeing Aerospace");
+    newOrg.setLocation("India");
+  }
 
-    signUpRequest =
-        new SignupRequest()
-            .builder()
-            .username("admin")
-            .email("pspatel602@gmail.com")
-            .password("admin")
-            .enabled(true)
-            .verificationCode("12345")
-            .roles(rolesRequest)
-            .organization(new Organization("PE01", "Apple Inc.", "United States"))
-            .build();
+  @AfterAll
+  public void teardownAll() {
+    roleRepository.deleteAll();
+    userRepository.deleteAll();
+  }
+
+  @BeforeEach
+  void beforeEach() {
+    authService.registerUser(signUpRequest);
+    authService.authenticateUser(loginRequest);
+  }
+
+  @AfterEach
+  void teardownEach() {
+    userRepository.deleteAll();
   }
 
   @Order(1)
@@ -137,10 +162,19 @@ public class CrudServiceApplicationIntegrationTest {
   @Order(2)
   @Test
   public void test_add_user_without_role() {
+    System.out.println("newOrg: " + newOrg);
     UserRequest userRequestWithoutRole =
         new UserRequest(
-            "rajesh", "p7600204790@gmail.com", null, "parth@321", "123456789", true, newOrg);
-    boolean isExist = userRepository.existsByUsername(userRequestWithoutRole.getUsername());
+            "rajesh",
+            "p7600204790@gmail.com",
+            null,
+            "parth@321",
+            "123456789",
+            true,
+            new Organization(UUID.randomUUID().toString(), "Tata", "India"));
+
+    Boolean isExist = userRepository.existsByUsername(userRequestWithoutRole.getUsername());
+    System.out.println(isExist);
     assertFalse(isExist);
     userService.addUser(userRequestWithoutRole);
     boolean isUserExist = userRepository.existsByUsername(userRequestWithoutRole.getUsername());
@@ -152,30 +186,31 @@ public class CrudServiceApplicationIntegrationTest {
   public void test_getUsers() {
     List<User> allUsers = userRepository.findAll();
     System.out.println(allUsers);
-    assertEquals(userRequest.getUsername(), allUsers.stream().findFirst().get().getUsername());
+    System.out.println("UserRequest: " + userRequest);
+    assertEquals(loginRequest.getUsername(), allUsers.stream().findFirst().get().getUsername());
     System.out.println("In test_getUsers all user's list :" + allUsers);
   }
 
   @Test
   @Order(4)
   public void test_getUserByUsername() {
-    User actualUser = userService.getUserByUsername(userRequest.getUsername());
-    assertEquals(userRequest.getUsername(), actualUser.getUsername());
+    User actualUser = userService.getUserByUsername(loginRequest.getUsername());
+    assertEquals(loginRequest.getUsername(), actualUser.getUsername());
     System.out.println("In test_getUserByUsername actual user :" + actualUser);
   }
 
   @Test
   @Order(5)
   public void test_updateUserByUsername() {
-
+    userRepository.save(user);
     User actualUser = userService.getUserByUsername(user.getUsername());
-    System.out.println("In test_updateUserByUsername Before updating user: " + actualUser);
-    String expectedEmail = userService.getUserByUsername(user.getUsername()).getEmail();
-    user.setEmail("pparth602@yahoo.com");
+    String newUpdateEmail = "p7600204790@gmail.com";
+    user.setEmail(newUpdateEmail);
+
     User actualUpdatedUser = userService.updateUserByUsername(user);
     System.out.println(actualUpdatedUser);
-    assertNotEquals(expectedEmail, actualUpdatedUser.getEmail());
-    System.out.println("In test_updateUserByUsername After updating user :" + actualUpdatedUser);
+    assertNotEquals(actualUser.getEmail(), actualUpdatedUser.getEmail());
+    assertEquals(newUpdateEmail, actualUpdatedUser.getEmail());
   }
 
   @Test
@@ -204,6 +239,7 @@ public class CrudServiceApplicationIntegrationTest {
   @Test
   @Order(7)
   public void test_registerUser() {
+    userRepository.deleteAll();
     ResponseEntity actualRes = authService.registerUser(signUpRequest);
 
     assertThat(actualRes.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -217,7 +253,7 @@ public class CrudServiceApplicationIntegrationTest {
     assertThrows(
         BadCredentialsException.class,
         () -> {
-          authService.authenticateUser(loginRequest);
+          authService.authenticateUser(new LoginRequest("unknown user", "unknown_password"));
         });
     LoginRequest loginRequest1 =
         new LoginRequest(signUpRequest.getUsername(), signUpRequest.getPassword());
@@ -253,20 +289,18 @@ public class CrudServiceApplicationIntegrationTest {
   @Test
   @Order(10)
   public void test_registerUser_without_role() {
+    userRepository.deleteAll();
     SignupRequest signupRequestWithoutRole = new SignupRequest();
 
-    signupRequestWithoutRole =
-        signupRequestWithoutRole
-            .builder()
-            .username("admin")
-            .email("pspatel602@gmail.com")
-            .password("admin")
-            .enabled(true)
-            .verificationCode("12345")
-            .roles(null)
-            .organization(new Organization("PE01", "Apple Inc.", "United States"))
-            .build();
-    System.out.println("signupRequestWithoutRole:" + signupRequestWithoutRole);
+    signupRequestWithoutRole.setUsername("admin");
+    signupRequestWithoutRole.setEmail("pspatel602@gmail.com");
+    signupRequestWithoutRole.setPassword("admin");
+    signupRequestWithoutRole.setEnabled(true);
+    signupRequestWithoutRole.setVerificationCode("12345");
+    signupRequestWithoutRole.setRoles(null);
+    signupRequestWithoutRole.setOrganization(
+        new Organization("PE01", "Apple Inc.", "United States"));
+
     ResponseEntity actualRes = authService.registerUser(signupRequestWithoutRole);
 
     assertThat(actualRes.getStatusCode()).isEqualTo(HttpStatus.OK);
